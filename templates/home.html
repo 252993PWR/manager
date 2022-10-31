@@ -36,6 +36,13 @@
           <input type="submit" value="View"/>
         </form>
       </td>
+      <td>
+        <form onsubmit="return confirm('Are you sure about deleting this record?');" action="/deletePass" method="POST">
+          <input hidden type="text" value="delete" name="action">
+          <input hidden type="text" value="{{ item[0] }}" name="passUUID">
+          <input type="submit" value="Delete password"/>
+        </form>
+      </td>
     </tr>
     {% endfor %}
   {% endblock content %}

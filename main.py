@@ -193,7 +193,8 @@ def viewPass():
         # dictFromServer = res.json()
         # Remove session data, this will log the user out
         cursor = mysql.connection.cursor()
-        if request.form['action'] == 'save':
+        uuid = request.form['passUUID']
+        if request.form['action'] == 'applyEdit':
             cursor.execute("""
                 UPDATE
                 passwords,
@@ -215,7 +216,36 @@ def viewPass():
                 session['uuid'],
                 request.form['passUUID']])
             mysql.connection.commit()
-
+        elif request.form['action'] == 'applyAdd':
+            uuid = str(uid.uuid4())
+            cursor.execute("""
+                INSERT INTO passwords
+                (savedPassword,
+                uuid,
+                userUUID,
+                isKey)
+                VALUES
+                (%s,%s,%s,%s)""",
+                [request.form['savedPassword'],
+                uuid,
+                session['uuid'],
+                '0'])
+            mysql.connection.commit()
+            cursor.execute("""
+                INSERT INTO passwordsInfo
+                (passUUID,
+                name,
+                username,
+                pageURL,
+                note)
+                VALUES
+                (%s,%s,%s,%s,%s)""",
+                [uuid,
+                request.form['passName'],
+                request.form['passUsername'],
+                request.form['passPageURL'],
+                request.form['passNote']])
+            mysql.connection.commit()
         cursor.execute("""
             SELECT
             passwords.uuid,
@@ -227,10 +257,9 @@ def viewPass():
             JOIN passwords on users.uuid=passwords.userUUID
             JOIN passwordsInfo on passwords.uuid=passwordsInfo.passUUID
             WHERE passwords.UUID=%s AND
-            users.uuid=%s LIMIT 1""", [request.form['passUUID'],session['uuid']])
+            users.uuid=%s LIMIT 1""", [uuid,session['uuid']])
         password = cursor.fetchone()
         cursor.close()
-
         print(password)
         print(request.form['action'])
         return render_template('viewPass.html',
@@ -241,6 +270,28 @@ def viewPass():
         passPageURL=password[4],
         passNote=password[5],
         action=request.form['action'])
+    else:
+        return render_template('loginForm.html')
+
+@app.route('/addPass',methods=['POST'])
+def addPass():
+    if 'loggedin' in session:
+        if request.form['action']=='add':
+            return render_template('addPass.html',
+            action=request.form['action'])
+    else:
+        return render_template('loginForm.html')
+
+@app.route('/deletePass',methods=['POST'])
+def deletePass():
+    if 'loggedin' in session:
+        if request.form['action']=="delete":
+            cursor = mysql.connection.cursor()
+            cursor.execute("""
+                DELETE FROM passwords WHERE passwords.uuid=%s""",
+                [request.form['passUUID']])
+            mysql.connection.commit()
+            return redirect(url_for('home'))
     else:
         return render_template('loginForm.html')
 

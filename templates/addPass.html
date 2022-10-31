@@ -1,28 +1,60 @@
+<script>
+function randomPassword(length) {
+    var chars = "abcdefghijklmnopqrstuvwxyz!@#$%^&*()-+<>ABCDEFGHIJKLMNOP1234567890";
+    var pass = "";
+    for (var x = 0; x < length; x++) {
+        var i = Math.floor(Math.random() * chars.length);
+        pass += chars.charAt(i);
+    }
+    nums="1234567890";
+    specs="!@#$%^&*()-+<>";
+    var noNums=0;
+    var noSpecs=0;
+    var l=0;
+    for (var n = 0; n < nums.length; n++) {
+        if (pass.indexOf(nums.charAt(n))==-1) {
+            noNums=1;
+        }
+    }
+    for (var s = 0; s < specs.length; s++) {
+        if (pass.indexOf(specs.charAt(s))==-1) {
+            noSpecs=1;
+        }
+    }
+    if (noNums) {
+        i = Math.floor(Math.random() * nums.length);
+        l = Math.floor(Math.random() * length/2);
+        pass[l*2]=nums.charAt(i);
+    }
+    if (noSpecs) {
+        i = Math.floor(Math.random() * specs.length);
+        l = Math.floor(Math.random() * length/2);
+        if (l*2 == length) {
+            pass[(l*2)-1]=specs.charAt(i);
+        }
+        else {
+            pass[(l*2)+1]=specs.charAt(i);
+        }
+    }
+    passInfo.savedPassword.value = pass;
+}
+</script>
 {% block content %}
-  {% if action == 'edit' %}
-    <form action="/viewPass" method="POST">
+  {% if action == 'add' %}
+    <form name="passInfo" action="/viewPass" method="POST">
       <p><b>Name:</b><input type="text" value="{{ passName }}" name="passName"/></p>
       <p><b>Username:</b><input type="text" value="{{ passUsername }}" name="passUsername"/></p>
-      <p><b>Password:</b><input type="text" value="{{ savedPassword }}" name="savedPassword"/></p>
+      <p><b>Password:</b><input onLoad="randomPassword(12);" type="text" value="{{ savedPassword }}" name="savedPassword"/></p>
+      <input type="button" class="button" value="Generate" onclick="randomPassword(12);" tabindex="2">
+      <script>randomPassword(12);</script>
       <p><b>PageURL:</b><input type="text" value="{{ passPageURL }}" name="passPageURL"/></p>
       <p><b>Note:</b><input type="text" value="{{ passNote }}" name="passNote"/></p>
       <input hidden type="text" value="{{ passUUID }}" name="passUUID">
-      <input hidden type="text" value="save" name="action">
-      <input type="submit" value="Save"/>
+      <input hidden type="text" value="applyAdd" name="action">
+      <input type="submit" value="Save password"/>
     </form>
-  {% else %}
-    <p><b>Name:</b> {{ passName }}</p>
-    <p><b>Username:</b> {{ passUsername }}</p>
-    <p><b>Password:</b> {{ savedPassword }}</p>
-    <p><b>PageURL:</b> {{ passPageURL }}</p>
-    <p><b>Note:</b> {{ passNote }}</p>
   {% endif %}
 {% endblock content %}
-<form action="/viewPass" method="POST">
-    <input hidden type="text" value="edit" name="action">
-    <input hidden type="text" value="{{ passUUID }}" name="passUUID">
-    <input type="submit" value="Edit"/>
-</form>
 <form action="/home">
     <input type="submit" value="Back" />
 </form>

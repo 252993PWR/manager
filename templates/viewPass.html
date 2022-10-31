@@ -7,8 +7,8 @@
       <p><b>PageURL:</b><input type="text" value="{{ passPageURL }}" name="passPageURL"/></p>
       <p><b>Note:</b><input type="text" value="{{ passNote }}" name="passNote"/></p>
       <input hidden type="text" value="{{ passUUID }}" name="passUUID">
-      <input hidden type="text" value="save" name="action">
-      <input type="submit" value="Save"/>
+      <input hidden type="text" value="applyEdit" name="action">
+      <input type="submit" value="Apply changes"/>
     </form>
   {% else %}
     <p><b>Name:</b> {{ passName }}</p>
