@@ -1,0 +1,54 @@
+<script>
+  function copyToClipboard(x) {
+    // Get the text field
+    var copyText = document.getElementById(x);
+
+    // Select the text field
+    copyText.select();
+    copyText.setSelectionRange(0, 99999); // For mobile devices
+
+     // Copy the text inside the text field
+    navigator.clipboard.writeText(copyText.value);
+
+    // Alert the copied text
+    alert("Password successfully copied");
+  }
+</script>
+
+
+<h1>Welcome to home page {{ username }}</h1>
+<h2>Here are your saved data:</h2>
+<table border="1">
+  {% block content %}
+    {% for item in data %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ item[2] }}</td>
+      <td>{{ item[3] }}</td>
+      <td>
+        <input hidden type="password" value="{{ item[1] }}" id="{{ loop.index }}">
+        <button onclick="copyToClipboard({{ loop.index }})">Copy pass</button>
+      </td>
+      <td>
+        <form action="/viewPass" method="POST">
+          <input hidden type="text" value="view" name="action">
+          <input hidden type="text" value="{{ item[0] }}" name="passUUID">
+          <input type="submit" value="View"/>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  {% endblock content %}
+<table>
+<!--form method="post" action="/">
+    <input type="submit" value="VALUE1" name="addData"/>
+    <input type="submit" value="VALUE2" name="enableRemove"/>
+</form-->
+<br>
+<form action="/addPass" method="POST">
+  <input hidden type="text" value="add" name="action">
+  <input type="submit" value="Add password"/>
+</form>
+<form action="/logout">
+   <input type = "submit" value = "Log out" />
+</form>

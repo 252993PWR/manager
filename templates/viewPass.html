@@ -1,0 +1,28 @@
+{% block content %}
+  {% if action == 'edit' %}
+    <form action="/viewPass" method="POST">
+      <p><b>Name:</b><input type="text" value="{{ passName }}" name="passName"/></p>
+      <p><b>Username:</b><input type="text" value="{{ passUsername }}" name="passUsername"/></p>
+      <p><b>Password:</b><input type="text" value="{{ savedPassword }}" name="savedPassword"/></p>
+      <p><b>PageURL:</b><input type="text" value="{{ passPageURL }}" name="passPageURL"/></p>
+      <p><b>Note:</b><input type="text" value="{{ passNote }}" name="passNote"/></p>
+      <input hidden type="text" value="{{ passUUID }}" name="passUUID">
+      <input hidden type="text" value="save" name="action">
+      <input type="submit" value="Save"/>
+    </form>
+  {% else %}
+    <p><b>Name:</b> {{ passName }}</p>
+    <p><b>Username:</b> {{ passUsername }}</p>
+    <p><b>Password:</b> {{ savedPassword }}</p>
+    <p><b>PageURL:</b> {{ passPageURL }}</p>
+    <p><b>Note:</b> {{ passNote }}</p>
+  {% endif %}
+{% endblock content %}
+<form action="/viewPass" method="POST">
+    <input hidden type="text" value="edit" name="action">
+    <input hidden type="text" value="{{ passUUID }}" name="passUUID">
+    <input type="submit" value="Edit"/>
+</form>
+<form action="/home">
+    <input type="submit" value="Back" />
+</form>
