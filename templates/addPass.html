@@ -1,6 +1,6 @@
 <script>
 function randomPassword(length) {
-    var chars = "abcdefghijklmnopqrstuvwxyz!@#$%^&*()-+<>ABCDEFGHIJKLMNOP1234567890";
+    var chars = "abcdefghijklmnopqrstuvwxyz!@#$%^&*()-+<>ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
     var pass = "";
     for (var x = 0; x < length; x++) {
         var i = Math.floor(Math.random() * chars.length);
@@ -8,36 +8,48 @@ function randomPassword(length) {
     }
     nums="1234567890";
     specs="!@#$%^&*()-+<>";
-    var noNums=0;
-    var noSpecs=0;
-    var l=0;
-    for (var n = 0; n < nums.length; n++) {
-        if (pass.indexOf(nums.charAt(n))==-1) {
-            noNums=1;
+    big="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    small="abcdefghijklmnopqrstuvwxyz"
+    var noNums=1;
+    var noSpecs=1;
+    var noSmalls=1;
+    var noBigs=1;
+    while (true) {
+        for (var n = 0; n < nums.length; n++) {
+            if (pass.includes(nums.charAt(n))) {
+                noNums=0;
+            }
         }
-    }
-    for (var s = 0; s < specs.length; s++) {
-        if (pass.indexOf(specs.charAt(s))==-1) {
-            noSpecs=1;
+        for (var s = 0; s < specs.length; s++) {
+            if (pass.includes(specs.charAt(s))) {
+                noSpecs=0;
+            }
         }
-    }
-    if (noNums) {
-        i = Math.floor(Math.random() * nums.length);
-        l = Math.floor(Math.random() * length/2);
-        pass[l*2]=nums.charAt(i);
-    }
-    if (noSpecs) {
-        i = Math.floor(Math.random() * specs.length);
-        l = Math.floor(Math.random() * length/2);
-        if (l*2 == length) {
-            pass[(l*2)-1]=specs.charAt(i);
+        for (var lw = 0; lw < small.length; lw++) {
+            if (pass.includes(small.charAt(lw))) {
+                noSmalls=0;
+            }
+        }
+        for (var up = 0; up < big.length; up++) {
+            if (pass.includes(big.charAt(up))) {
+                noBigs=0;
+            }
+        }
+
+        if (!noSmalls && !noBigs && !noNums && !noSpecs) {
+            break;
         }
         else {
-            pass[(l*2)+1]=specs.charAt(i);
+            pass=''
+            for (var x = 0; x < length; x++) {
+                var i = Math.floor(Math.random() * chars.length);
+                pass += chars.charAt(i);
+            }
         }
     }
     passInfo.savedPassword.value = pass;
 }
+
 </script>
 {% block content %}
   {% if action == 'add' %}
