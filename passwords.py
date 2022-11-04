@@ -1,10 +1,3 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
-from flask_mysqldb import MySQL
-import MySQLdb.cursors
-import re
-import requests
-import uuid as uid
-
 from manager import *
 
 @app.route('/home', endpoint='home')
@@ -32,18 +25,8 @@ def home():
 
 @app.route('/viewPass',methods=['POST'], endpoint='viewPass')
 def viewPass():
-    #print(request.headers)
     if 'loggedin' in session:
         print(session)
-        # session['passUUID']=request.form['passUUID']
-        # dictToSend = {
-        #     'passUUID':request.form['passUUID'],
-        # }
-        #print('xxxx')
-        # res = requests.post('http://localhost:5000/api/viewPass', json=dictToSend)
-        # print('response from server:',res.text)
-        # dictFromServer = res.json()
-        # Remove session data, this will log the user out
         cursor = mysql.connection.cursor()
         uuid = request.form['passUUID']
         if request.form['action'] == 'applyEdit':

@@ -1,10 +1,3 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
-from flask_mysqldb import MySQL
-import MySQLdb.cursors
-import re
-import requests
-import uuid as uid
-
 from manager import *
 
 @app.route('/registerForm', endpoint='registerForm')
@@ -26,19 +19,9 @@ def register():
     res = requests.post('http://localhost:5000/api/register', json=dictToSend)
     print('response from server:',res.text)
     dictFromServer = res.json()
-    #return 'Your email:'+str(dictFromServer['username'])
     return render_template('registerForm.html',
     msg=dictFromServer['msg'],
     error=dictFromServer['error'])
-    #email=dictFromServer['username'],
-    #password=dictFromServer['password'])
-        # name = request.form['name']
-        # password = request.form['password']
-        # cursor = mysql.connection.cursor()
-        # cursor.execute(''' INSERT INTO info_table VALUES(%s,%s)''',(name,password))
-        # mysql.connection.commit()
-        # cursor.close()
-        #return f"Done!!"
 
 @app.route('/api/register', methods=['POST'], endpoint='apiRegister')
 def apiRegister():
