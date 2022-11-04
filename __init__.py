@@ -4,6 +4,13 @@ import MySQLdb.cursors
 import re
 import requests
 import uuid as uid
+from passlib.hash import pbkdf2_sha512
+import base64
+
+from Crypto.Cipher import AES
+from Crypto import Random
+from Crypto.Util.Padding import pad, unpad
+from Crypto.Protocol.KDF import PBKDF2
 
 app = Flask(__name__)
 

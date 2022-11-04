@@ -1,4 +1,5 @@
 from manager import *
+from manager.misc import *
 
 @app.route('/home', endpoint='home')
 def home():
@@ -13,7 +14,7 @@ def home():
             passwordsInfo.username FROM users
             JOIN passwords on users.uuid=passwords.userUUID
             JOIN passwordsInfo on passwords.uuid=passwordsInfo.passUUID
-            WHERE users.uuid=%s"""
+            WHERE users.uuid=%s AND NOT passwords.isKey"""
         cursor.execute(query, [session['uuid']])
         passwords = cursor.fetchall()
         cursor.close()

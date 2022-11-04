@@ -1,4 +1,5 @@
 from manager import *
+from manager.misc import *
 
 @app.route('/registerForm', endpoint='registerForm')
 def registerForm():
@@ -61,13 +62,47 @@ def apiRegister():
     else:
         uuid = str(uid.uuid4())
 
+        keyC = generateKeyC()
+        keyA = pbkdf2Hash(input_json['password'])
+        keyB = aesEncrypt(keyC, keyA)
+        #check = aesDecrypt(keyB, keyA)
+        print()
+        print(len(keyA))
+        print(keyA)
+        print()
+        print(len(keyB))
+        print(keyB)
+        print()
+        print(len(keyC))
+        print(keyC)
+        print()
+
+        #a=1/0
         query="""
             INSERT INTO users (username,keyB,uuid)
             VALUES(%s,%s,%s)"""
         cursor.execute(query,
         [input_json['username'],
-        input_json['password'],
+        keyB,
         uuid])
+        mysql.connection.commit()
+
+        userPassword = aesEncrypt(keyA, keyC)
+        passUUID = str(uid.uuid4())
+
+        query="""
+            INSERT INTO passwords
+            (savedPassword,
+            uuid,
+            userUUID,
+            isKey)
+            VALUES
+            (%s,%s,%s,%s)"""
+        cursor.execute(query,
+            [userPassword,
+            passUUID,
+            uuid,
+            '1'])
         mysql.connection.commit()
 
         dictToReturn['error']=0
@@ -85,6 +120,9 @@ def login():
     print('response from server:',res.text)
     dictFromServer = res.json()
     #return 'Your email:'+str(dictFromServer['username'])
+    # session['loggedin'] = True
+    # session['uuid'] = "13cc6720-917a-4d03-b5d6-8c033ef9948e"
+    # return redirect(url_for('home'))
     if dictFromServer['error']:
         return render_template('loginForm.html',
         msg=dictFromServer['msg'],
@@ -106,19 +144,64 @@ def apiLogin():
         dictToReturn['error']=1
         dictToReturn['msg'] = 'Please fill out the form!'
     else:
+
+        # keyC = generateKeyC()
+        # keyA = pbkdf2Hash(input_json['password'])
+        # keyB = base64.b64encode(aesEncrypt(keyC, keyA)).decode('ascii')
+        # #check = aesDecrypt(keyB, keyA)
+        # print(len(keyB))
+        # print(keyB)
+        #
         query="""
             SELECT * FROM users
-            WHERE username LIKE %s AND keyB LIKE %s
+            WHERE username LIKE %s
             LIMIT 1"""
         cursor.execute(query,
-        [input_json['username'],
-        input_json['password']])
+        [input_json['username']])
         account = cursor.fetchone()
         cursor.close()
         if account:
-            dictToReturn['error']=0
-            dictToReturn['uuid'] = account[3]
-            dictToReturn['msg'] = 'Successfully logged in!'
+            cursor = mysql.connection.cursor()
+            query="""
+                SELECT
+                passwords.uuid,
+                passwords.savedPassword,
+                passwords.isKey FROM passwords
+                WHERE passwords.userUUID=%s AND passwords.isKey"""
+            cursor.execute(query, [account[3]])
+            userPassword = cursor.fetchone()[1]
+
+            # keyA1 = pbkdf2Hash(input_json['password'])
+            # keyB1 = account[2]
+            # keyC1 = decryptFromDB(account[2], keyA1)
+
+            # print()
+            # print(str(uid.uuid4().hex))
+
+            #keyB = base64.b64encode(aesEncrypt(keyC, keyA)).decode('ascii')
+            try:
+                keyA1 = pbkdf2Hash(input_json['password'])
+                keyB1 = account[2]
+                keyC1 = aesDecrypt(account[2], keyA1)
+
+                keyA2 = aesDecrypt(userPassword,keyC1)
+                if keyA2 == keyA1:
+                    dictToReturn['error']=0
+                    dictToReturn['uuid'] = account[3]
+                    dictToReturn['msg'] = 'Successfully logged in!'
+                else:
+                    dictToReturn['error']=2
+                    dictToReturn['msg'] = 'Wrong email or password'
+            except:
+                dictToReturn['error']=2
+                dictToReturn['msg'] = 'Wrong email or password'
+
+            # keyB1 = base64.b64encode(aesEncrypt(keyC, keyA)).decode('ascii')
+            #
+            # userPassword = base64.b64encode(aesEncrypt(keyA, keyC)).decode('ascii')
+            # keyA = aesDecrypt(base64.b64decode(userPassword.encode('ascii')), keyC)
+            #
+            # print(password)
         else:
             dictToReturn['error']=2
             dictToReturn['msg'] = 'Wrong email or password'
