@@ -26,3 +26,4 @@ defaultUrl = "http://localhost:5000"
 
 import manager.accounts
 import manager.passwords
+import manager.organizations

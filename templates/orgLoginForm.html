@@ -1,9 +1,11 @@
-<h1>Private account login panel</h1>
-<p><a href="/orgLogin">Go to organization login panel</a></p>
+<h1>Organization account login panel</h1>
+<p><a href="/loginForm">Go to private account login panel</a></p>
 <br>
 
-<form action="/login" method = "POST">
-  <p>Email <input type = "text" name = "username"/></p>
+<form action="/orgLogin" method = "POST">
+  <p>Organization code <input type = "text" name = "orgUsername"/></p>
+  <p>Organization password <input type = "password" name = "orgPassword" /></p>
+  <p>Username <input type = "text" name = "username"/></p>
   <p>Password <input type = "password" name = "password" /></p>
   <p><input type = "submit" value = "Log in" /></p>
 </form>
@@ -14,8 +16,9 @@
   {% endautoescape %}
 </div>
 
-<form action="/registerForm" method = "GET">
+<form action="/orgRegisterForm" method = "GET">
   <br>
-  <p>Don't have account yet?</p>
-  <p><input type = "submit" value = "Register here" /></p>
+  <p>Don't have account yet? Ask your organization's admin to create one</p>
+  <p>Or create your own organization account</p>
+  <p><input type = "submit" value = "Register new organizataion" /></p>
 </form>
