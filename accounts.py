@@ -66,16 +66,16 @@ def apiRegister():
         keyA = pbkdf2Hash(input_json['password'])
         keyB = aesEncrypt(keyC, keyA)
         #check = aesDecrypt(keyB, keyA)
-        print()
-        print(len(keyA))
-        print(keyA)
-        print()
-        print(len(keyB))
-        print(keyB)
-        print()
-        print(len(keyC))
-        print(keyC)
-        print()
+        # print()
+        # print(len(keyA))
+        # print(keyA)
+        # print()
+        # print(len(keyB))
+        # print(keyB)
+        # print()
+        # print(len(keyC))
+        # print(keyC)
+        # print()
 
         #a=1/0
         query="""
@@ -129,7 +129,11 @@ def login():
         error=dictFromServer['error'])
     else:
         session['loggedin'] = True
-        session['uuid'] = dictFromServer['uuid']
+        dictFromServer.pop('msg',None)
+        dictFromServer.pop('error',None)
+        for key in dictFromServer.keys():
+            #print(key)
+            session[key]=dictFromServer[key]
         return redirect(url_for('home'))
 
 @app.route('/api/login', methods=['POST'], endpoint='apiLogin')
@@ -169,7 +173,10 @@ def apiLogin():
                 passwords.isKey FROM passwords
                 WHERE passwords.userUUID=%s AND passwords.isKey"""
             cursor.execute(query, [account[3]])
-            userPassword = cursor.fetchone()[1]
+            try:
+                userPassword = cursor.fetchone()[1]
+            except TypeError:
+                pass
 
             # keyA1 = pbkdf2Hash(input_json['password'])
             # keyB1 = account[2]
@@ -179,6 +186,7 @@ def apiLogin():
             # print(str(uid.uuid4().hex))
 
             #keyB = base64.b64encode(aesEncrypt(keyC, keyA)).decode('ascii')
+
             try:
                 keyA1 = pbkdf2Hash(input_json['password'])
                 keyB1 = account[2]
@@ -186,13 +194,22 @@ def apiLogin():
 
                 keyA2 = aesDecrypt(userPassword,keyC1)
                 if keyA2 == keyA1:
+                    tokenSalt="d586780483a24f5eb45a8124eb55791582788754e6a64fea945762ce40b64444ef8e03805b1e45b9bdc675bac51cb23d59b887094d1c4611b95ddbd741fe5237"
+                    tempToken = str(uid.uuid4().hex)
+                    token = pbkdf2Hash(tempToken,tokenSalt)
+                    cipherToken = aesEncrypt(keyA1, token)
                     dictToReturn['error']=0
                     dictToReturn['uuid'] = account[3]
                     dictToReturn['msg'] = 'Successfully logged in!'
+                    dictToReturn['cipherToken'] = bytesToHex(cipherToken)
+                    dictToReturn['tempToken'] = tempToken
                 else:
                     dictToReturn['error']=2
                     dictToReturn['msg'] = 'Wrong email or password'
-            except:
+            except binascii.Error as err:
+                dictToReturn['error']=2
+                dictToReturn['msg'] = 'Wrong email or password'
+            except ValueError:
                 dictToReturn['error']=2
                 dictToReturn['msg'] = 'Wrong email or password'
 
@@ -210,7 +227,7 @@ def apiLogin():
 @app.route('/logout', endpoint='logout')
 def logout():
     # Remove session data, this will log the user out
-    session.pop('loggedin', None)
-    session.pop('passUUID', None)
-    session.pop('uuid', None)
+    sess=dict(session)
+    for key in sess.keys():
+        session.pop(key, None)
     return redirect(url_for('home'))

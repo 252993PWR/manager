@@ -1,28 +1,55 @@
+<script src="../static/script.js"></script>
+<script>
+  function passHide(hideId) {
+  var x = document.getElementById(hideId);
+  var y = document.getElementById("switchVisible");
+    if (x.style.display === "none") {
+      x.style.display = "block";
+      y.innerHTML = "Hide Password"
+      y.value="Hide Password"
+    }
+    else {
+      x.style.display = "none";
+      y.innerHTML = "Show Password"
+      y.value="Show Password"
+    }
+}</script>
 {% block content %}
   {% if action == 'edit' %}
-    <form action="/viewPass" method="POST">
+    <form name="passInfo" action="/viewPass" method="POST">
       <p><b>Name:</b><input type="text" value="{{ passName }}" name="passName"/></p>
       <p><b>Username:</b><input type="text" value="{{ passUsername }}" name="passUsername"/></p>
-      <p><b>Password:</b><input type="text" value="{{ savedPassword }}" name="savedPassword"/></p>
+      <input type="button" id="switchVisible" class="button" value="Show Password" onclick="passHide('passw1')" tabindex="2">
+      <div style="display: none;" id="passw1">
+        <p><b>Password:</b><input onLoad="randomPassword(12);" type="text" value="{{ savedPassword }}" name="savedPassword"/></p>
+        <input type="button" class="button" value="Generate New" onclick="randomPassword(12);" tabindex="2">
+      </div>
       <p><b>PageURL:</b><input type="text" value="{{ passPageURL }}" name="passPageURL"/></p>
       <p><b>Note:</b><input type="text" value="{{ passNote }}" name="passNote"/></p>
       <input hidden type="text" value="{{ passUUID }}" name="passUUID">
       <input hidden type="text" value="applyEdit" name="action">
       <input type="submit" value="Apply changes"/>
     </form>
+    <form action="/viewPass" method="POST">
+        <input hidden type="text" value="view" name="action">
+        <input hidden type="text" value="{{ passUUID }}" name="passUUID">
+        <input type="submit" value="Revert changes" />
+    </form>
+
   {% else %}
     <p><b>Name:</b> {{ passName }}</p>
     <p><b>Username:</b> {{ passUsername }}</p>
-    <p><b>Password:</b> {{ savedPassword }}</p>
+    <button onclick="passHide('passw2')" id="switchVisible">Show Password</button>
+    <div id="passw2" style="display: none;"><b>Password:</b> {{ savedPassword }}</div>
     <p><b>PageURL:</b> {{ passPageURL }}</p>
     <p><b>Note:</b> {{ passNote }}</p>
+    <form action="/viewPass" method="POST">
+        <input hidden type="text" value="edit" name="action">
+        <input hidden type="text" value="{{ passUUID }}" name="passUUID">
+        <input type="submit" value="Edit"/>
+    </form>
+    <form action="/home">
+        <input type="submit" value="Back" />
+    </form>
   {% endif %}
 {% endblock content %}
-<form action="/viewPass" method="POST">
-    <input hidden type="text" value="edit" name="action">
-    <input hidden type="text" value="{{ passUUID }}" name="passUUID">
-    <input type="submit" value="Edit"/>
-</form>
-<form action="/home">
-    <input type="submit" value="Back" />
-</form>

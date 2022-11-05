@@ -17,10 +17,15 @@ def home():
             WHERE users.uuid=%s AND NOT passwords.isKey"""
         cursor.execute(query, [session['uuid']])
         passwords = cursor.fetchall()
+        passList=[[x for x in p] for p in passwords]
+        #print(passList)
         cursor.close()
-        print(passwords)
+        for i,p in enumerate(passwords):
+            tokenSalt="d586780483a24f5eb45a8124eb55791582788754e6a64fea945762ce40b64444ef8e03805b1e45b9bdc675bac51cb23d59b887094d1c4611b95ddbd741fe5237"
+            keyC = getKeyC(session['cipherToken'],session['tempToken'],tokenSalt,session['uuid'])
+            passList[i][1]=aesDecrypt(p[1],keyC).decode('ascii')
         return render_template('home.html',
-        data=passwords)
+        data=tuple(passList))
     else:
         return render_template('loginForm.html')
 
@@ -30,7 +35,12 @@ def viewPass():
         print(session)
         cursor = mysql.connection.cursor()
         uuid = request.form['passUUID']
+
+        tokenSalt="d586780483a24f5eb45a8124eb55791582788754e6a64fea945762ce40b64444ef8e03805b1e45b9bdc675bac51cb23d59b887094d1c4611b95ddbd741fe5237"
+        keyC = getKeyC(session['cipherToken'],session['tempToken'],tokenSalt,session['uuid'])
+
         if request.form['action'] == 'applyEdit':
+            passw = request.form['savedPassword'].encode('ascii')
             query="""
                 UPDATE
                 passwords,
@@ -44,7 +54,7 @@ def viewPass():
                 passwords.userUUID=%s AND
                 passwordsInfo.passUUID=%s"""
             cursor.execute(query,
-                [request.form['savedPassword'],
+                [aesEncrypt(passw,keyC),
                 request.form['passName'],
                 request.form['passUsername'],
                 request.form['passPageURL'],
@@ -53,7 +63,9 @@ def viewPass():
                 session['uuid'],
                 request.form['passUUID']])
             mysql.connection.commit()
+
         elif request.form['action'] == 'applyAdd':
+            passw = request.form['savedPassword'].encode('ascii')
             uuid = str(uid.uuid4())
             query="""
                 INSERT INTO passwords
@@ -64,7 +76,7 @@ def viewPass():
                 VALUES
                 (%s,%s,%s,%s)"""
             cursor.execute(query,
-                [request.form['savedPassword'],
+                [aesEncrypt(passw,keyC),
                 uuid,
                 session['uuid'],
                 '0'])
@@ -99,18 +111,25 @@ def viewPass():
             WHERE passwords.UUID=%s AND
             users.uuid=%s LIMIT 1"""
         cursor.execute(query, [uuid,session['uuid']])
+        print("XXXX")
+
         password = cursor.fetchone()
         cursor.close()
-        print(password)
-        print(request.form['action'])
+        #print(password)
+        #print(request.form['action'])
+
+        tokenSalt="d586780483a24f5eb45a8124eb55791582788754e6a64fea945762ce40b64444ef8e03805b1e45b9bdc675bac51cb23d59b887094d1c4611b95ddbd741fe5237"
+        keyC = getKeyC(session['cipherToken'],session['tempToken'],tokenSalt,session['uuid'])
+        passw = password[1]
+
         return render_template('viewPass.html',
-        passUUID=password[0],
-        savedPassword=password[1],
-        passName=password[2],
-        passUsername=password[3],
-        passPageURL=password[4],
-        passNote=password[5],
-        action=request.form['action'])
+            passUUID=password[0],
+            savedPassword=aesDecrypt(passw,keyC).decode('ascii'),
+            passName=password[2],
+            passUsername=password[3],
+            passPageURL=password[4],
+            passNote=password[5],
+            action=request.form['action'])
     else:
         return render_template('loginForm.html')
 

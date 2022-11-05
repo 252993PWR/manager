@@ -1,0 +1,25 @@
+<form action="/register" method = "POST">
+   <p>Email <input type = "text" name = "username"/></p>
+   <p>Password <input type = "password" name = "password" /></p>
+   <p>Confirm password <input type = "password" name = "confPassword" /></p>
+   <p><input type = "submit" value = "Register" /></p>
+</form>
+<div>
+  {% autoescape false %}
+  <p>{{ msg }}</p>
+  {% endautoescape %}
+  {% block content %}
+    {% if error == 0 %}
+      <br>
+      <form action="/loginForm" method = "GET">
+         <p><input type = "submit" value = "Log in here" /></p>
+      </form>
+    {% else %}
+      <form action="/loginForm" method = "GET">
+        <br>
+        <p>Already have account?</p>
+        <p><input type = "submit" value = "Log in here" /></p>
+      </form>
+    {% endif %}
+  {% endblock content %}
+</div>
