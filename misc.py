@@ -39,6 +39,19 @@ def getKeyC(cipherToken,tempToken,tokenSalt,userUUID):
     # print(keyA)
     return aesDecrypt(keyB, keyA)
 
+def getOrgUUID(userUUID):
+    cursor = mysql.connection.cursor()
+    query="""
+        SELECT * FROM usersOrganizations
+        WHERE userUUID LIKE %s
+        LIMIT 1"""
+    cursor.execute(query,
+    [userUUID])
+    if cursor.fetchone():
+        return cursor.fetchone()[4]
+    else:
+        return False
+
 def getKeyA(cipherToken,tempToken,tokenSalt):
     return aesDecrypt(hexToBytes(cipherToken),pbkdf2Hash(tempToken,tokenSalt))
 

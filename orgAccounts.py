@@ -1,90 +1,91 @@
 from manager import *
 from manager.misc import *
 
-@app.route('/registerForm', endpoint='registerForm')
+@app.route('/orgRegisterForm', endpoint='orgRegisterForm')
 def registerForm():
-    return render_template('registerForm.html')
+    return render_template('orgRegisterForm.html')
 
-@app.route('/loginForm', endpoint='loginForm')
-def loginForm():
-    return render_template('loginForm.html')
+@app.route('/orgLoginForm', endpoint='orgLoginForm')
+def orgLoginForm():
+    return render_template('orgLoginForm.html')
 
-@app.route('/register', methods=['POST'], endpoint='register')
-def register():
+@app.route('/orgRegister', methods=['POST'], endpoint='orgRegister')
+def orgRegister():
     # Here you send data needed to do things
     dictToSend = {
-        'username':request.form['username'],
-        'password':request.form['password'],
-        'confPassword':request.form['confPassword']
+        'orgName':request.form['orgName']
+        #'confirmationMail':request.form['confirmationName']
     }
-    res = requests.post('http://localhost:5000/api/register', json=dictToSend)
+    res = requests.post('http://localhost:5000/api/orgRegister', json=dictToSend)
     print('response from server:',res.text)
     dictFromServer = res.json()
-    return render_template('registerForm.html',
+    return render_template('orgRegisterForm.html',
     msg=dictFromServer['msg'],
     error=dictFromServer['error'])
 
-@app.route('/api/register', methods=['POST'], endpoint='apiRegister')
-def apiRegister():
+@app.route('/api/orgRegister', methods=['POST'], endpoint='orgApiRegister')
+def orgApiRegister():
     # Here you do things on database etc.
     input_json = request.get_json(force=True)
     print('data from client:', input_json)
     dictToReturn = {}
     cursor = mysql.connection.cursor()
     # Check if account already exist
-    query="""
-        SELECT * FROM users
-        WHERE username LIKE %s"""
-    cursor.execute(query, [input_json['username']])
-    account = cursor.fetchone()
-    if not input_json['password'] or not input_json['username'] or not input_json['confPassword']:
+    if not input_json['orgName']:
         dictToReturn['error']=1
         dictToReturn['msg'] = 'Please fill out the form!'
-    elif not re.match(r'^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,4}$', input_json['username']):
+    elif not re.match(r'^[a-zA-Z0-9]{3,}$', input_json['orgName']):
         dictToReturn['error']=2
-        dictToReturn['msg'] = 'Invalid email address!'
-    elif account:
-        dictToReturn['error']=3
-        dictToReturn['msg'] = 'Account already exist!'
-    elif not re.match(r'(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$&*])(?=.*[A-Z]).{8,}$', input_json['password']):
-        dictToReturn['error']=4
         dictToReturn['msg'] = '''
-        Weak password!<br><br>
-        Your password should have:<br>
-        - at least one special character: !@#$&*<br>
-        - at least one digit<br>
-        - at least one lowercase letter<br>
-        - length of at least 8<br>
+        Wrong organization name!<br>
+        - Organization name should be at least 3 character long<br>
+        - No special characters are allowed
         '''
-    elif not input_json['password'] == input_json['confPassword']:
-        dictToReturn['error']=5
-        dictToReturn['msg'] = 'Passwords are not identical!'
     else:
+        # Add organization
+        orgName=input_json['orgName']
+        orgCode=generateRandomName(input_json['orgName'])
+        orgPass=generatePass(6)
+
+        orgUUID = str(uid.uuid4())
+        orgPassHash = pbkdf2Hash(orgPass)
+
+        query="""
+            INSERT INTO organizations (uuid,name,code,password)
+            VALUES(%s,%s,%s,%s)"""
+        cursor.execute(query,
+        [orgUUID,
+        orgName,
+        orgCode,
+        orgPassHash])
+        mysql.connection.commit()
+
+        # Add admin user
+        adminUsername=generateRandomName('admin',len=5,sep='-')
+        adminPass=generatePass(12)
+
         uuid = str(uid.uuid4())
 
         keyC = generateKeyC()
-        keyA = pbkdf2Hash(input_json['password'])
+        keyA = pbkdf2Hash(adminPass)
         keyB = aesEncrypt(keyC, keyA)
-        #check = aesDecrypt(keyB, keyA)
-        # print()
-        # print(len(keyA))
-        # print(keyA)
-        # print()
-        # print(len(keyB))
-        # print(keyB)
-        # print()
-        # print(len(keyC))
-        # print(keyC)
-        # print()
 
-        #a=1/0
         query="""
             INSERT INTO users (username,keyB,uuid)
             VALUES(%s,%s,%s)"""
         cursor.execute(query,
-        [input_json['username'],
+        [adminUsername,
         keyB,
         uuid])
+        mysql.connection.commit()
+
+        query="""
+            INSERT INTO usersOrganizations (userUUID, orgUUID, isAdmin)
+            VALUES(%s,%s,%s)"""
+        cursor.execute(query,
+        [uuid,
+        orgUUID,
+        '1'])
         mysql.connection.commit()
 
         userPassword = aesEncrypt(keyA, keyC)
@@ -106,25 +107,35 @@ def apiRegister():
         mysql.connection.commit()
 
         dictToReturn['error']=0
-        dictToReturn['msg']='Account successfully created!'
+        dictToReturn['msg']='''
+        Organization and default admin account successfully created!<br>
+        <b><u>Write down your access credentials:</u></b><br><br>
+        <b>Known for all members:<br>
+        - Organization code:</b> {0}<br>
+        - <b>Organization password:</b> {1}<br><br>
+        <b>Known only for organization administrator (you):<br>
+        - Admin username:</b> {2}<br>
+        - <b>Admin password:</b> {3}<br>
+        '''.format(orgCode, orgPass, adminUsername, adminPass)
+
     cursor.close()
     return jsonify(dictToReturn)
 
-@app.route('/login',methods=['POST'],endpoint='login')
-def login():
+
+@app.route('/orgLogin',methods=['POST'],endpoint='orgLogin')
+def orgLogin():
     dictToSend = {
+        'orgCode':request.form['orgCode'],
+        'orgPass':request.form['orgPass'],
         'username':request.form['username'],
         'password':request.form['password'],
     }
-    res = requests.post('http://localhost:5000/api/login', json=dictToSend)
+    print('xxx')
+    res = requests.post('http://localhost:5000/api/orgLogin', json=dictToSend)
     print('response from server:',res.text)
     dictFromServer = res.json()
-    #return 'Your email:'+str(dictFromServer['username'])
-    # session['loggedin'] = True
-    # session['uuid'] = "13cc6720-917a-4d03-b5d6-8c033ef9948e"
-    # return redirect(url_for('home'))
     if dictFromServer['error']:
-        return render_template('loginForm.html',
+        return render_template('orgLoginForm.html',
         msg=dictFromServer['msg'],
         error=dictFromServer['error'])
     else:
@@ -136,26 +147,30 @@ def login():
             session[key]=dictFromServer[key]
         return redirect(url_for('home'))
 
-@app.route('/api/login', methods=['POST'], endpoint='apiLogin')
-def apiLogin():
+@app.route('/api/orgLogin', methods=['POST'], endpoint='orgApiLogin')
+def orgApiLogin():
     input_json = request.get_json(force=True)
     print('data from client:', input_json)
     dictToReturn = {}
     dictToReturn['error']=0
     dictToReturn['msg']='IT WORKS!'
     cursor = mysql.connection.cursor()
-    if not input_json['password'] or not input_json['username']:
+    if not input_json['orgCode'] or not input_json['orgPass'] or not input_json['username'] or not input_json['password']:
         dictToReturn['error']=1
         dictToReturn['msg'] = 'Please fill out the form!'
     else:
+        # Check org
+        cursor = mysql.connection.cursor()
+        query="""
+            SELECT * FROM organizations
+            WHERE code LIKE %s
+            LIMIT 1"""
+        cursor.execute(query,
+        [input_json['orgCode']])
+        org = cursor.fetchone()
 
-        # keyC = generateKeyC()
-        # keyA = pbkdf2Hash(input_json['password'])
-        # keyB = base64.b64encode(aesEncrypt(keyC, keyA)).decode('ascii')
-        # #check = aesDecrypt(keyB, keyA)
-        # print(len(keyB))
-        # print(keyB)
-        #
+        # Check org username
+        cursor = mysql.connection.cursor()
         query="""
             SELECT * FROM users
             WHERE username LIKE %s
@@ -163,8 +178,14 @@ def apiLogin():
         cursor.execute(query,
         [input_json['username']])
         account = cursor.fetchone()
-        cursor.close()
-        if account:
+
+        if account and org:
+            # Check org pass
+            orgPassHash1=org[4]
+            orgPassHash2=pbkdf2Hash(input_json['orgPass'])
+            orgAccess=(orgPassHash1==orgPassHash2)
+
+            # Check org user pass
             cursor = mysql.connection.cursor()
             query="""
                 SELECT
@@ -178,22 +199,13 @@ def apiLogin():
             except TypeError:
                 pass
 
-            # keyA1 = pbkdf2Hash(input_json['password'])
-            # keyB1 = account[2]
-            # keyC1 = decryptFromDB(account[2], keyA1)
-
-            # print()
-            # print(str(uid.uuid4().hex))
-
-            #keyB = base64.b64encode(aesEncrypt(keyC, keyA)).decode('ascii')
-
             try:
                 keyA1 = pbkdf2Hash(input_json['password'])
                 keyB1 = account[2]
                 keyC1 = aesDecrypt(account[2], keyA1)
 
                 keyA2 = aesDecrypt(userPassword,keyC1)
-                if keyA2 == keyA1:
+                if keyA2 == keyA1 and orgAccess:
                     tokenSalt="d586780483a24f5eb45a8124eb55791582788754e6a64fea945762ce40b64444ef8e03805b1e45b9bdc675bac51cb23d59b887094d1c4611b95ddbd741fe5237"
                     tempToken = str(uid.uuid4().hex)
                     token = pbkdf2Hash(tempToken,tokenSalt)
@@ -203,34 +215,18 @@ def apiLogin():
                     dictToReturn['msg'] = 'Successfully logged in!'
                     dictToReturn['cipherToken'] = bytesToHex(cipherToken)
                     dictToReturn['tempToken'] = tempToken
+                    dictToReturn['orgUUID'] = org[1]
                 else:
                     dictToReturn['error']=2
-                    dictToReturn['msg'] = 'Wrong email or password'
+                    dictToReturn['msg'] = 'Wrong credentials'
             except binascii.Error as err:
                 dictToReturn['error']=2
-                dictToReturn['msg'] = 'Wrong email or password'
+                dictToReturn['msg'] = 'Wrong credentials'
             except ValueError:
                 dictToReturn['error']=2
-                dictToReturn['msg'] = 'Wrong email or password'
+                dictToReturn['msg'] = 'Wrong credentials'
 
-            # keyB1 = base64.b64encode(aesEncrypt(keyC, keyA)).decode('ascii')
-            #
-            # userPassword = base64.b64encode(aesEncrypt(keyA, keyC)).decode('ascii')
-            # keyA = aesDecrypt(base64.b64decode(userPassword.encode('ascii')), keyC)
-            #
-            # print(password)
         else:
             dictToReturn['error']=2
-            dictToReturn['msg'] = 'Wrong email or password'
+            dictToReturn['msg'] = 'Wrong credentials'
     return jsonify(dictToReturn)
-
-@app.route('/logout', endpoint='logout')
-def logout():
-    # Remove session data, this will log the user out
-    sess=dict(session)
-    for key in sess.keys():
-        session.pop(key, None)
-    if sess['orgUUID']:
-        return redirect(url_for('orgLoginForm'))
-    else:
-        return redirect(url_for('loginForm'))

@@ -16,10 +16,10 @@
 </script>
 
 
-<h1>Welcome to home page {{ username }}</h1>
-<h2>Here are your saved data:</h2>
+<h1>Welcome to home page</h1>
+<h2>Here are your saved passwords:</h2>
+{% block content %}
 <table border="1">
-  {% block content %}
     {% for item in data %}
     <tr>
       <td>{{ loop.index }}</td>
@@ -45,7 +45,6 @@
       </td>
     </tr>
     {% endfor %}
-  {% endblock content %}
 <table>
 <!--form method="post" action="/">
     <input type="submit" value="VALUE1" name="addData"/>
@@ -56,6 +55,16 @@
   <input hidden type="text" value="add" name="action">
   <input type="submit" value="Add password"/>
 </form>
+{% if session['orgUUID'] %}
+<br><br>
+<form action="/manageOrg" method="POST">
+  <input hidden type="text" value="viewUsers" name="action">
+  <input type="submit" value="Manage your organization"/>
+</form>
+<br>
+{% endif %}
+<br>
 <form action="/logout">
    <input type = "submit" value = "Log out" />
 </form>
+{% endblock content %}
