@@ -55,15 +55,15 @@
   <input hidden type="text" value="add" name="action">
   <input type="submit" value="Add password"/>
 </form>
-{% if session['orgUUID'] %}
+{% if session['orgUUID'] and isAdmin%}
 <br><br>
-<form action="/manageOrg" method="POST">
-  <input hidden type="text" value="viewUsers" name="action">
+<form action="/orgManage" method="POST">
+  <input hidden type="text" value="manageHome" name="action">
   <input type="submit" value="Manage your organization"/>
 </form>
-<br>
+
 {% endif %}
-<br>
+<br><br><br>
 <form action="/logout">
    <input type = "submit" value = "Log out" />
 </form>

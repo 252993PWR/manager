@@ -20,12 +20,21 @@ def home():
         passList=[[x for x in p] for p in passwords]
         #print(passList)
         cursor.close()
+
+        cursor = mysql.connection.cursor()
+        query="""
+            SELECT * FROM usersOrganizations
+            WHERE userUUID LIKE %s"""
+        cursor.execute(query,[session['uuid']])
+        isAdmin=cursor.fetchone()[3]
+
         for i,p in enumerate(passwords):
             tokenSalt="d586780483a24f5eb45a8124eb55791582788754e6a64fea945762ce40b64444ef8e03805b1e45b9bdc675bac51cb23d59b887094d1c4611b95ddbd741fe5237"
             keyC = getKeyC(session['cipherToken'],session['tempToken'],tokenSalt,session['uuid'])
             passList[i][1]=aesDecrypt(p[1],keyC).decode('ascii')
         return render_template('home.html',
-        data=tuple(passList))
+        data=tuple(passList),
+        isAdmin=isAdmin)
     else:
         return render_template('loginForm.html')
 

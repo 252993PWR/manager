@@ -1,0 +1,92 @@
+<script>
+  function copyToClipboard(x) {
+    // Get the text field
+    var copyText = document.getElementById(x);
+
+    // Select the text field
+    copyText.select();
+    copyText.setSelectionRange(0, 99999); // For mobile devices
+
+     // Copy the text inside the text field
+    navigator.clipboard.writeText(copyText.value);
+
+    // Alert the copied text
+    alert("Password successfully copied");
+  }
+</script>
+
+<h1>Organization management page</h1>
+{% block content %}
+  {% if action == 'manageHome' %}
+  <h2>Here are users of your organization:</h2>
+  <table border="1">
+      {% for item in data %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ item[1] }}</td>
+        <td>{{ item[2] }}</td>
+        <td>{{ item[3] }}</td>
+        <td>{{ item[4] }}</td>
+        <td>
+          <form onsubmit="return confirm('Are you sure about deleting this user?\nThis also means remove of his saved passwords!');" action="/orgManage" method="POST">
+            <input hidden type="text" value="deleteUser" name="action">
+            <input hidden type="text" value="{{ item[0] }}" name="userUUID">
+            <input type="submit" value="Delete user"/>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+  <table>
+  <!--form method="post" action="/">
+      <input type="submit" value="VALUE1" name="addData"/>
+      <input type="submit" value="VALUE2" name="enableRemove"/>
+  </form-->
+  <br>
+  <form action="/orgManage" method="POST">
+    <input hidden type="text" value="addUser" name="action">
+    <input type="submit" value="Add User"/>
+  </form>
+    {% if session['orgUUID'] %}
+    <br><br>
+    <form action="/home">
+        <input type="submit" value="Go back to passwords view" />
+    </form>
+    <br>
+    {% endif %}
+  {% elif action == 'addUser' %}
+  <script src="../static/script.js"></script>
+  <h2>Adding new user:</h2>
+    <form name="passInfo" action="/orgManage" method="POST">
+      <p><b>Name: </b><input type="text" value="{{ firstName }}" name="firstName"/></p>
+      <p><b>Surname: </b><input type="text" value="{{ secondName }}" name="secondName"/></p>
+      <p><b>Organization mail: </b><input type="text" value="{{ orgMail }}" name="orgMail"/></p>
+      <p><b>Password: </b><input onLoad="randomPassword(12);" type="text" value="{{ userPass }}" name="savedPassword"/>
+      <input type="button" class="button" value="Generate" onclick="randomPassword(12);" tabindex="2"></p>
+      <script>randomPassword(12);</script>
+      <input hidden type="text" value="{{ userUUID }}" name="userUUID">
+      <input hidden type="text" value="applyAddUser" name="action"><br><br>
+      <input type="submit" value="Save user"/>
+    </form>
+    <form action="/orgManage" method="POST">
+        <input hidden type="text" value="manageHome" name="action">
+        <input type="submit" value="Go back to users list" />
+    </form>
+  {% elif action == 'applyAddUser' %}
+  <h2>{{ msg }}</h2>
+    <b><u>Message new member ({{ firstName }} {{ secondName }} - {{ orgName }}) with account access credentials:</u></b><br><br>
+    <b>Username:</b> {{ username }} <br>
+    <b>Password:</b> {{ userPass }} <br><br>
+    <form action="/orgManage" method="POST">
+      <input hidden type="text" value="addUser" name="action">
+      <input type="submit" value="Add another User"/>
+    </form>
+    <form action="/orgManage" method="POST">
+        <input hidden type="text" value="manageHome" name="action">
+        <input type="submit" value="Go back to users list" />
+    </form>
+  {% endif %}
+  <br><br>
+  <form action="/logout">
+     <input type = "submit" value = "Log out" />
+  </form>
+{% endblock content %}
