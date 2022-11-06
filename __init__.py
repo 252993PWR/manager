@@ -7,6 +7,7 @@ import uuid as uid
 from passlib.hash import pbkdf2_sha512
 import base64
 import binascii
+import random
 
 from Crypto.Cipher import AES
 from Crypto import Random

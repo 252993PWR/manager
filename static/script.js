@@ -1,12 +1,12 @@
 function randomPassword(length) {
-    var chars = "abcdefghijklmnopqrstuvwxyz!@#$%^&*()-+<>ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+    var chars = "abcdefghijklmnopqrstuvwxyz!@#$&*ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
     var pass = "";
     for (var x = 0; x < length; x++) {
         var i = Math.floor(Math.random() * chars.length);
         pass += chars.charAt(i);
     }
     nums="1234567890";
-    specs="!@#$%^&*()-+<>";
+    specs="!@#$&*";
     big="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     small="abcdefghijklmnopqrstuvwxyz"
     var noNums=1;

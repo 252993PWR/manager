@@ -47,3 +47,18 @@ def bytesToHex(byteValue):
 
 def hexToBytes(hexValue):
     return binascii.unhexlify(hexValue.encode('ascii'))
+
+def generateRandomName(seed, *args, **kwargs):
+    len = kwargs.get('len', 3)
+    sep = kwargs.get('sep', '-')
+    output = seed.lower()[:len]+str(sep)+str(uid.uuid4().hex)[:4]
+    return output
+
+def generatePass(length):
+    characters="abcdefghijklmnopqrstuvwxyz!@#$&*ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+    while(True):
+        passw=''.join(random.choice(characters) for i in range(length))
+        reg = r'(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$&*])(?=.*[A-Z]).{' + re.escape(str(length)) + r',}$'
+        if re.match(reg, passw):
+            break
+    return passw
