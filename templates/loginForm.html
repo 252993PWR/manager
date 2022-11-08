@@ -25,10 +25,11 @@
         </li>
       </ul>
     </nav>
-    <br><br>
-    <div class="container">
+    <br>
+    <div class="w-75 container-fluid">
       <h3>Login to your account</h3>
-      <form action="/login" class="was-validated"  method="POST">
+      <br>
+      <form action="/login" method="POST">
         <div class="form-group">
           <label for="uname">Username:</label>
           <input type="text" class="form-control" id="uname" placeholder="Enter username" name="username" required>
@@ -41,14 +42,15 @@
         </div>
         <button type="submit" class="btn btn-info">Log in</button>
       </form>
+      <br><br><br>
+      <div>
+        <h5>Don't have account yet?</h5>
+        <form action="/registerForm" method="GET">
+          <button type="submit" class="btn btn-info btn-sm">Register Here</button>
+        </form>
+      </div>
     </div>
-    <br>
-    <div class="container">
-      <h5>Don't have account yet?</h5>
-      <form action="/registerForm" method="GET">
-        <button type="submit" class="btn btn-info btn-sm">Register Here</button>
-      </form>
-    </div>
+    <br><br>
 
     {% if error==2 %}
       <div class="modal fade" id="modal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">

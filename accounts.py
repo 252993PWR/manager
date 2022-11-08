@@ -230,7 +230,7 @@ def logout():
     sess=dict(session)
     for key in sess.keys():
         session.pop(key, None)
-    if sess['orgUUID']:
+    if 'orgUUID' in sess:
         return redirect(url_for('orgLoginForm'))
     else:
         return redirect(url_for('loginForm'))

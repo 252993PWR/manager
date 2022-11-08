@@ -1,4 +1,5 @@
-function randomPassword(length) {
+function randomPassword() {
+    var length = document.getElementById("passLength").value
     var chars = "abcdefghijklmnopqrstuvwxyz!@#$&*ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
     var pass = "";
     for (var x = 0; x < length; x++) {
@@ -46,5 +47,34 @@ function randomPassword(length) {
             }
         }
     }
-    passInfo.savedPassword.value = pass;
+    var el = document.getElementById('passw')
+    el.value = pass;
+}
+
+function copyToClipboard(x) {
+    // Get the text field
+    var copyText = document.getElementById(x);
+
+    // Select the text field
+    copyText.select();
+    copyText.setSelectionRange(0, 99999); // For mobile devices
+
+     // Copy the text inside the text field
+    navigator.clipboard.writeText(copyText.value);
+
+    // Alert the copied text
+    $("#modal1").modal('show');
+}
+
+function passHide(hideId) {
+  var x = document.getElementById(hideId);
+  var y = document.getElementById("switchVisible");
+  if (x.type === "password") {
+    x.type = "text";
+    y.innerHTML = '<i class="fa fa-eye"></i>';
+  }
+  else {
+    x.type = "password";
+    y.innerHTML = '<i class="fa fa-eye-slash"></i>';
+  }
 }

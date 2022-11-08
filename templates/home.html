@@ -1,70 +1,102 @@
-<script>
-  function copyToClipboard(x) {
-    // Get the text field
-    var copyText = document.getElementById(x);
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="author" content="252993 PWR Łukasz Dolata">
+    <meta name="description" content="High accessability, secure password manager">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="../static/style.css">
+    <script src="../static/script.js"></script>
+    <title>Manager Priv Login</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-sm bg-info navbar-dark">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <form class="form-inline my-2 my-lg-0" action="/addPass" method="POST">
+              <input hidden type="text" value="add" name="action">
+              <button class="btn btn-info" type="submit">Add new password</button>
+          </form>
+        </li>
+        {% if session['orgUUID'] and isAdmin%}
+        <li class="nav-item">
+          <form class="form-inline my-2 my-lg-0" action="/orgManage" method="POST">
+              <input hidden type="text" value="manageHome" name="action">
+              <button class="btn btn-info" type="submit">Manage your organization</button>
+          </form>
+        </li>
+        {% endif %}
+      </ul>
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <form class="form-inline my-2 my-lg-0" action="/logout">
+              <button class="btn btn-info" type="submit">Log out</button>
+          </form>
+        </li>
+      </ul>
+    </nav>
+    <br>
+    <div class="container-fluid">
+      <h3>Here are your saved passwords:</h3>
+      <br>
+      <div class="row">
+        <div class="col-12">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th class="col-1 align-middle" scope="col">#</th>
+                <th class="align-middle" scope="col">Name</th>
+                <th class="align-middle" scope="col">Username</th>
+                <th class="col-3 align-middle" scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in data %}
+              <tr>
+                <th class="align-middle" scope="row">{{ loop.index }}</th>
+                <td class="align-middle">{{ item[2] }}</td>
+                <td class="align-middle">{{ item[3] }}</td>
+                <td class="align-middle">
+                  <form action="/viewPass" method="POST">
+                    <input hidden type="text" value="view" name="action">
+                    <input hidden type="text" value="{{ item[0] }}" name="passUUID">
+                    <button type="submit" class="btn btn-info">View</button>
+                  </form>
 
-    // Select the text field
-    copyText.select();
-    copyText.setSelectionRange(0, 99999); // For mobile devices
+                  <input hidden type="password" value="{{ item[1] }}" id="{{ loop.index }}">
+                  <button onclick="copyToClipboard({{ loop.index }})" type="button" class="btn btn-success">Copy</button>
 
-     // Copy the text inside the text field
-    navigator.clipboard.writeText(copyText.value);
-
-    // Alert the copied text
-    alert("Password successfully copied");
-  }
-</script>
-
-
-<h1>Welcome to home page</h1>
-<h2>Here are your saved passwords:</h2>
-{% block content %}
-<table border="1">
-    {% for item in data %}
-    <tr>
-      <td>{{ loop.index }}</td>
-      <td>{{ item[2] }}</td>
-      <td>{{ item[3] }}</td>
-      <td>
-        <input hidden type="password" value="{{ item[1] }}" id="{{ loop.index }}">
-        <button onclick="copyToClipboard({{ loop.index }})">Copy pass</button>
-      </td>
-      <td>
-        <form action="/viewPass" method="POST">
-          <input hidden type="text" value="view" name="action">
-          <input hidden type="text" value="{{ item[0] }}" name="passUUID">
-          <input type="submit" value="View"/>
-        </form>
-      </td>
-      <td>
-        <form onsubmit="return confirm('Are you sure about deleting this record?');" action="/deletePass" method="POST">
-          <input hidden type="text" value="delete" name="action">
-          <input hidden type="text" value="{{ item[0] }}" name="passUUID">
-          <input type="submit" value="Delete password"/>
-        </form>
-      </td>
-    </tr>
-    {% endfor %}
-<table>
-<!--form method="post" action="/">
-    <input type="submit" value="VALUE1" name="addData"/>
-    <input type="submit" value="VALUE2" name="enableRemove"/>
-</form-->
-<br>
-<form action="/addPass" method="POST">
-  <input hidden type="text" value="add" name="action">
-  <input type="submit" value="Add password"/>
-</form>
-{% if session['orgUUID'] and isAdmin%}
-<br><br>
-<form action="/orgManage" method="POST">
-  <input hidden type="text" value="manageHome" name="action">
-  <input type="submit" value="Manage your organization"/>
-</form>
-
-{% endif %}
-<br><br><br>
-<form action="/logout">
-   <input type = "submit" value = "Log out" />
-</form>
-{% endblock content %}
+                  <form onsubmit="return confirm('Are you sure about deleting this password?');" action="/deletePass" method="POST">
+                    <input hidden type="text" value="delete" name="action">
+                    <input hidden type="text" value="{{ item[0] }}" name="passUUID">
+                    <button type="submit" class="btn btn-danger float-right">Delete</button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <form class="form-inline my-2 my-lg-0" action="/addPass" method="POST">
+          <input hidden type="text" value="add" name="action">
+          <button class="btn btn-info" type="submit">Add new password</button>
+      </form>
+      <div class="modal fade" id="modal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalCenterTitle">Success</h5>
+            </div>
+            <div class="modal-body">
+              Password Successfully copied!
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

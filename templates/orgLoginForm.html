@@ -8,6 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../static/script.js"></script>
     <link rel="stylesheet" href="../static/style.css">
     <title>Manager Priv Login</title>
   </head>
@@ -25,10 +26,11 @@
         </li>
       </ul>
     </nav>
-    <br><br>
-    <div class="container">
+    <br>
+    <div class="w-75 container-fluid">
       <h3>Login to your organization account</h3>
-      <form action="/orgLogin" class="was-validated"  method="POST">
+      <br>
+      <form action="/orgLogin" method="POST">
         <div class="form-group">
           <label for="uname">Organization code:</label>
           <input type="text" class="form-control" id="uname" placeholder="Enter organization code" name="orgCode" required>
@@ -51,16 +53,17 @@
         </div>
         <button type="submit" class="btn btn-info">Log in</button>
       </form>
+      <br><br><br>
+      <div>
+        <h5>Don't have account yet? Ask your organization's admin to create one</h5>
+        <br>
+        <h5>Or create your own organization</h5>
+        <form action="/orgRegisterForm" method="GET">
+          <button type="submit" class="btn btn-info btn-sm">Register new organizataion</button>
+        </form>
+      </div>
     </div>
-    <br>
-    <div class="container">
-      <h5>Don't have account yet? Ask your organization's admin to create one</h5>
-      <br>
-      <h5>Or create your own organization</h5>
-      <form action="/orgRegisterForm" method="GET">
-        <button type="submit" class="btn btn-info btn-sm">Register new organizataion</button>
-      </form>
-    </div>
+    <br><br>
 
     {% if error==2 %}
       <div class="modal fade" id="modal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">

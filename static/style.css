@@ -1,0 +1,30 @@
+.container {
+  padding: 2rem 0rem;
+}
+
+h4 {
+  margin: 2rem 0rem 1rem;
+}
+
+.table-image {
+  td, th {
+    vertical-align: middle;
+  }
+}
+
+form {
+    display: inline;
+}
+
+.input-group-prepend {
+  width : 25%;
+}
+
+.input-group-prepend . label {
+  width: 100%;
+  overflow: hidden;
+}
+
+.input-group-text {
+  width : 100%;
+}

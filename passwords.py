@@ -26,7 +26,10 @@ def home():
             SELECT * FROM usersOrganizations
             WHERE userUUID LIKE %s"""
         cursor.execute(query,[session['uuid']])
-        isAdmin=cursor.fetchone()[3]
+        if cursor.fetchone():
+            isAdmin=cursor.fetchone()[3]
+        else:
+            isAdmin=0
 
         for i,p in enumerate(passwords):
             tokenSalt="d586780483a24f5eb45a8124eb55791582788754e6a64fea945762ce40b64444ef8e03805b1e45b9bdc675bac51cb23d59b887094d1c4611b95ddbd741fe5237"
