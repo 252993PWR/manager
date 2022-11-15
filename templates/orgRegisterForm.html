@@ -56,6 +56,26 @@
         <form action="/orgLoginForm" method="GET">
           <button type="submit" class="btn btn-info">Login here</button>
         </form>
+        {% if error in [2] %}
+        <div class="modal fade" id="modal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+              <div class="modal-content">
+                  <div class="modal-header">
+                      <h5 class="modal-title" id="exampleModalCenterTitle">Error</h5>
+                  </div>
+
+                  <div class="modal-body">
+                    {% autoescape false %}
+                      {{ msg }}
+                    {% endautoescape %}
+                  </div>
+              </div>
+          </div>
+        </div>
+        <script type="text/javascript">
+          $("#modal1").modal('show');
+        </script>
+        {% endif %}
       {% endif %}
       </div>
       </body>

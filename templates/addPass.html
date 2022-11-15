@@ -53,9 +53,9 @@
             <div class="input-group-prepend">
               <span class="input-group-text" id="inputGroup-sizing-default"><b>Password</b></span>
             </div>
-            <input style="font-family:monospace;" type="text" value="{{ savedPassword }}" name="savedPassword" id="passw" class="form-control" aria-label="savedPassword" aria-describedby="inputGroup-sizing-default" minlength="12" maxlength="32" required>
+            <input style="font-family:monospace;" type="password" value="{{ savedPassword }}" name="savedPassword" id="passw" class="form-control" aria-label="savedPassword" aria-describedby="inputGroup-sizing-default" minlength="12" maxlength="32" required>
             <div class="input-group-append">
-              <button type="button" id="switchVisible" class="btn btn-outline-info" onclick="passHide('passw')" tabindex="2"><i class="fa fa-eye"></i></button>
+              <button type="button" id="switchVisible" class="btn btn-outline-info" onclick="passHide('passw')" tabindex="2"><i class="fa fa-eye-slash"></i></button>
               <button type="button" class="btn btn-info" onclick="randomPassword();">Generate</button>
               <select class="custom-select" id="passLength">
                 <option value="12">Length</option>
@@ -108,3 +108,5 @@
         </form>
       {% endif %}
       </div>
+  </body>
+</html>
