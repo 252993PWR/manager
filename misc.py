@@ -63,8 +63,8 @@ def hexToBytes(hexValue):
 
 def generateRandomName(seed, *args, **kwargs):
     len = kwargs.get('len', 3)
-    sep = kwargs.get('sep', '-')
-    output = seed.lower()[:len]+str(sep)+str(uid.uuid4().hex)[:4]
+    sep = kwargs.get('sep', '')
+    output = seed.lower()[:len]+str(sep)+(''.join(["{}".format(random.randint(0, 9)) for num in range(0, 6)]))
     return output
 
 def generatePass(length):

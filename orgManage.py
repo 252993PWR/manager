@@ -59,7 +59,7 @@ def orgManage():
             elif request.form['action'] == 'applyAddUser':
                 print('XXX')
                 # Add admin user
-                username=generateRandomName('user',len=4,sep='-')
+                username=generateRandomName('user',len=4)
                 userPass=request.form['savedPassword']
 
                 uuid = str(uid.uuid4())

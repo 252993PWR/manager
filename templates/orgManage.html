@@ -1,92 +1,195 @@
-<script>
-  function copyToClipboard(x) {
-    // Get the text field
-    var copyText = document.getElementById(x);
-
-    // Select the text field
-    copyText.select();
-    copyText.setSelectionRange(0, 99999); // For mobile devices
-
-     // Copy the text inside the text field
-    navigator.clipboard.writeText(copyText.value);
-
-    // Alert the copied text
-    alert("Password successfully copied");
-  }
-</script>
-
-<h1>Organization management page</h1>
-{% block content %}
-  {% if action == 'manageHome' %}
-  <h2>Here are users of your organization:</h2>
-  <table border="1">
-      {% for item in data %}
-      <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ item[1] }}</td>
-        <td>{{ item[2] }}</td>
-        <td>{{ item[3] }}</td>
-        <td>{{ item[4] }}</td>
-        <td>
-          <form onsubmit="return confirm('Are you sure about deleting this user?\nThis also means remove of his saved passwords!');" action="/orgManage" method="POST">
-            <input hidden type="text" value="deleteUser" name="action">
-            <input hidden type="text" value="{{ item[0] }}" name="userUUID">
-            <input type="submit" value="Delete user"/>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="author" content="252993 PWR Łukasz Dolata">
+    <meta name="description" content="High accessability, secure password manager">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="../static/style.css">
+    <script src="../static/script.js"></script>
+    <title>Manager Organization Manage</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-sm bg-info navbar-dark">
+      <ul class="navbar-nav mr-auto">
+        {% if session['orgUUID'] and action=='manageHome' %}
+        <li class="nav-item">
+          <form class="form-inline my-2 my-lg-0" action="/home" method="GET">
+              <button class="btn btn-info" type="submit">Go back</button>
           </form>
-        </td>
-      </tr>
-      {% endfor %}
-  <table>
-  <!--form method="post" action="/">
-      <input type="submit" value="VALUE1" name="addData"/>
-      <input type="submit" value="VALUE2" name="enableRemove"/>
-  </form-->
-  <br>
-  <form action="/orgManage" method="POST">
-    <input hidden type="text" value="addUser" name="action">
-    <input type="submit" value="Add User"/>
-  </form>
-    {% if session['orgUUID'] %}
-    <br><br>
-    <form action="/home">
-        <input type="submit" value="Go back to passwords view" />
-    </form>
+        </li>
+        <li class="nav-item">
+          <form class="form-inline my-2 my-lg-0" action="/orgManage" method="POST">
+              <input hidden type="text" value="addUser" name="action">
+              <button class="btn btn-info" type="submit">Add new user</button>
+          </form>
+        </li>
+        {% elif session['orgUUID'] and action=='addUser' %}
+        <li class="nav-item">
+          <form class="form-inline my-2 my-lg-0" action="/orgManage" method="POST">
+              <input hidden type="text" value="manageHome" name="action">
+              <button class="btn btn-info" type="submit">Go back</button>
+          </form>
+        </li>
+        {% endif %}
+        {% if session['orgUUID'] and isAdmin %}
+        <li class="nav-item">
+          <form class="form-inline my-2 my-lg-0" action="/orgManage" method="POST">
+              <input hidden type="text" value="manageHome" name="action">
+              <button class="btn btn-info" type="submit">Manage your organization</button>
+          </form>
+        </li>
+        {% endif %}
+      </ul>
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <form class="form-inline my-2 my-lg-0" action="/logout">
+              <button class="btn btn-info" type="submit">Log out</button>
+          </form>
+        </li>
+      </ul>
+    </nav>
     <br>
-    {% endif %}
+    <div class="container-fluid">
+      {% if action == 'manageHome' %}
+      <h2>Organization management page</h2>
+      <h3>Here are users registered in your organization:</h3>
+      <br>
+      <div class="row">
+        <div class="col-12">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th class="col-1 align-middle" scope="col">#</th>
+                <th class="align-middle" scope="col">Username</th>
+                <th class="align-middle" scope="col">First name</th>
+                <th class="align-middle" scope="col">Surname</th>
+                <th class="col-3 align-middle" scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in data %}
+              <tr>
+                <th class="align-middle" scope="row">{{ loop.index }}</th>
+                <td class="align-middle">{{ item[1] }}</td>
+                <td class="align-middle">{{ item[2] }}</td>
+                <td class="align-middle">{{ item[3] }}</td>
+                <td class="align-middle">
+                  <form action="/viewPass" method="POST">
+                    <input hidden type="text" value="view" name="action">
+                    <input hidden type="text" value="{{ item[0] }}" name="passUUID">
+                    <!--button type="submit" class="btn btn-info">View</button-->
+                  </form>
+
+                  <form onsubmit="return confirm('Are you sure about deleting this user?\nThis also means remove of his saved passwords!');" action="/orgManage" method="POST">
+                    <input hidden type="text" value="deleteUser" name="action">
+                    <input hidden type="text" value="{{ item[0] }}" name="userUUID">
+                    <button type="submit" class="btn btn-danger float-right">Delete</button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <form class="form-inline my-2 my-lg-0" action="/orgManage" method="POST">
+          <input hidden type="text" value="addUser" name="action">
+          <button class="btn btn-info" type="submit">Add new user</button>
+      </form>
   {% elif action == 'addUser' %}
-  <script src="../static/script.js"></script>
-  <h2>Adding new user:</h2>
-    <form name="passInfo" action="/orgManage" method="POST">
-      <p><b>Name: </b><input type="text" value="{{ firstName }}" name="firstName"/></p>
-      <p><b>Surname: </b><input type="text" value="{{ secondName }}" name="secondName"/></p>
-      <p><b>Organization mail: </b><input type="text" value="{{ orgMail }}" name="orgMail"/></p>
-      <p><b>Password: </b><input onLoad="randomPassword(12);" type="text" value="{{ userPass }}" name="savedPassword"/>
-      <input type="button" class="button" value="Generate" onclick="randomPassword(12);" tabindex="2"></p>
-      <script>randomPassword(12);</script>
-      <input hidden type="text" value="{{ userUUID }}" name="userUUID">
-      <input hidden type="text" value="applyAddUser" name="action"><br><br>
-      <input type="submit" value="Save user"/>
-    </form>
-    <form action="/orgManage" method="POST">
-        <input hidden type="text" value="manageHome" name="action">
-        <input type="submit" value="Go back to users list" />
-    </form>
+      <div class="w-75 p-3 container-fluid">
+        {% if action == 'addUser' %}
+          <form name="passInfo" action="/orgManage" method="POST">
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup-sizing-default"><b>First name</b></span>
+              </div>
+              <input type="text" value="{{ firstName }}" name="firstName" class="form-control" aria-label="Password name" aria-describedby="inputGroup-sizing-default" maxlength="32" required>
+              <div class="invalid-feedback">Please fill out this field</div>
+            </div>
+
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup-sizing-default"><b>Surname</b></span>
+              </div>
+              <input type="text" value="{{ secondName }}" name="secondName" class="form-control" aria-label="passUsername" aria-describedby="inputGroup-sizing-default" maxlength="32" required>
+              <div class="invalid-feedback">Please fill out this field</div>
+            </div>
+
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup-sizing-default">Organization mail</span>
+              </div>
+              <input type="text" value="{{ orgMail }}" name="orgMail" class="form-control" aria-label="passPageURL" aria-describedby="inputGroup-sizing-default" maxlength="255">
+            </div>
+
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup-sizing-default"><b>Password</b></span>
+              </div>
+              <input style="font-family:monospace;" type="text" value="{{ savedPassword }}" name="savedPassword" id="passw" class="form-control" aria-label="savedPassword" aria-describedby="inputGroup-sizing-default" minlength="12" maxlength="32" required>
+              <div class="invalid-feedback">Please fill out this field</div>
+              <div class="input-group-append">
+                <button type="button" id="switchVisible" class="btn btn-outline-info" onclick="passHide('passw')" tabindex="2"><i class="fa fa-eye"></i></button>
+                <button type="button" class="btn btn-info" onclick="randomPassword();">Generate</button>
+                <select class="custom-select" id="passLength">
+                  <option value="12">Length</option>
+                  <option value="12" selected>12</option>
+                  <option value="13">13</option>
+                  <option value="14">14</option>
+                  <option value="15">15</option>
+                  <option value="16">16</option>
+                  <option value="17">17</option>
+                  <option value="18">18</option>
+                  <option value="19">19</option>
+                  <option value="20">20</option>
+                  <option value="21">21</option>
+                  <option value="22">22</option>
+                  <option value="23">23</option>
+                  <option value="24">24</option>
+                  <option value="25">25</option>
+                  <option value="26">26</option>
+                  <option value="27">27</option>
+                  <option value="28">28</option>
+                  <option value="29">29</option>
+                  <option value="30">30</option>
+                  <option value="31">31</option>
+                  <option value="32">32</option>
+                </select>
+                <script>randomPassword();</script>
+              </div>
+            </div>
+
+            <input hidden type="text" value="{{ userUUID }}" name="userUUID">
+            <input hidden type="text" value="applyAddUser" name="action">
+            <button type="submit" class="btn btn-info">Add new user</button>
+          </form>
+        {% endif %}
+        </div>
   {% elif action == 'applyAddUser' %}
-  <h2>{{ msg }}</h2>
-    <b><u>Message new member ({{ firstName }} {{ secondName }} - {{ orgName }}) with account access credentials:</u></b><br><br>
-    <b>Username:</b> {{ username }} <br>
-    <b>Password:</b> {{ userPass }} <br><br>
-    <form action="/orgManage" method="POST">
-      <input hidden type="text" value="addUser" name="action">
-      <input type="submit" value="Add another User"/>
-    </form>
-    <form action="/orgManage" method="POST">
-        <input hidden type="text" value="manageHome" name="action">
-        <input type="submit" value="Go back to users list" />
-    </form>
+  <div class="w-75 p-3 container-fluid">
+    <div class="card">
+      <h5 class="card-header h5">{{ msg }}!</h5>
+      <div class="card-body">
+        <h5 class="card-title">Message new member ({{ firstName }} {{ secondName }}) with account access credentials:</h5>
+        <p class="card-text">
+        <b>Username:</b> {{ username }} <br>
+        <b>Password:</b> {{ userPass }}</p>
+        <form action="/orgManage" method="POST">
+            <input hidden type="text" value="addUser" name="action">
+            <button class="btn btn-info" type="submit">Add another user</button>
+        </form>
+        <form action="/orgManage" method="POST">
+            <input hidden type="text" value="manageHome" name="action">
+            <button class="btn btn-info" type="submit">Go back to users list</button>
+        </form>
+      </div>
+    </div>
+  </div>
   {% endif %}
   <br><br>
-  <form action="/logout">
-     <input type = "submit" value = "Log out" />
-  </form>
-{% endblock content %}

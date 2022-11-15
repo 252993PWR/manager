@@ -11,7 +11,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="../static/style.css">
     <script src="../static/script.js"></script>
-    <title>Manager Priv Login</title>
+    <title>Manager Add New Password</title>
   </head>
   <body>
     <nav class="navbar navbar-expand-sm bg-info navbar-dark">
@@ -53,7 +53,7 @@
             <div class="input-group-prepend">
               <span class="input-group-text" id="inputGroup-sizing-default"><b>Password</b></span>
             </div>
-            <input type="text" value="{{ savedPassword }}" name="savedPassword" id="passw" class="form-control" aria-label="savedPassword" aria-describedby="inputGroup-sizing-default" minlength="12" maxlength="32" required>
+            <input style="font-family:monospace;" type="text" value="{{ savedPassword }}" name="savedPassword" id="passw" class="form-control" aria-label="savedPassword" aria-describedby="inputGroup-sizing-default" minlength="12" maxlength="32" required>
             <div class="input-group-append">
               <button type="button" id="switchVisible" class="btn btn-outline-info" onclick="passHide('passw')" tabindex="2"><i class="fa fa-eye"></i></button>
               <button type="button" class="btn btn-info" onclick="randomPassword();">Generate</button>

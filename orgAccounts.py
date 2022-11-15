@@ -61,7 +61,7 @@ def orgApiRegister():
         mysql.connection.commit()
 
         # Add admin user
-        adminUsername=generateRandomName('admin',len=5,sep='-')
+        adminUsername=generateRandomName('admin',len=5)
         adminPass=generatePass(12)
 
         uuid = str(uid.uuid4())
@@ -108,7 +108,6 @@ def orgApiRegister():
 
         dictToReturn['error']=0
         dictToReturn['msg']='''
-        Organization and default admin account successfully created!<br>
         <b><u>Write down your access credentials:</u></b><br><br>
         <b>Known for all members:<br>
         - Organization code:</b> {0}<br>

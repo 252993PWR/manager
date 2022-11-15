@@ -24,10 +24,11 @@ def home():
         cursor = mysql.connection.cursor()
         query="""
             SELECT * FROM usersOrganizations
-            WHERE userUUID LIKE %s"""
+            WHERE userUUID LIKE %s LIMIT 1"""
         cursor.execute(query,[session['uuid']])
-        if cursor.fetchone():
-            isAdmin=cursor.fetchone()[3]
+        usr = cursor.fetchone()
+        if usr:
+            isAdmin=usr[3]
         else:
             isAdmin=0
 
