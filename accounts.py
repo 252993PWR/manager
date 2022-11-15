@@ -46,15 +46,15 @@ def apiRegister():
     elif account:
         dictToReturn['error']=3
         dictToReturn['msg'] = 'Account already exist!'
-    elif not re.match(r'(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$&*])(?=.*[A-Z]).{8,}$', input_json['password']):
+    elif not re.match(r'(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$&*])(?=.*[A-Z]).{12,}$', input_json['password']):
         dictToReturn['error']=4
         dictToReturn['msg'] = '''
-        Weak password!<br><br>
+        <b>Weak password!</b><br><br>
         Your password should have:<br>
         - at least one special character: !@#$&*<br>
         - at least one digit<br>
         - at least one lowercase letter<br>
-        - length of at least 8<br>
+        - length of at least 12<br>
         '''
     elif not input_json['password'] == input_json['confPassword']:
         dictToReturn['error']=5
